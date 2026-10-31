@@ -1,0 +1,9 @@
+$env:MINIKUBE_HOME = "D:\minikube-data\.minikube"
+minikube start -p devops-task4 --keep-context
+
+$runnerDir = Join-Path $env:LOCALAPPDATA "devops-task4-runner"
+& "$runnerDir\gitlab-runner.exe" run --config "$runnerDir\config.toml" --working-directory "$runnerDir"
+
+
+kubectl --context devops-task4 -n staging rollout status deployment/ecommerce --timeout=300s
+kubectl --context devops-task4 -n staging port-forward service/ecommerce 8084:80
