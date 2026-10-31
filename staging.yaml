@@ -1,0 +1,77 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: staging
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ecommerce-data
+  namespace: staging
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ecommerce
+  namespace: staging
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: ecommerce
+  template:
+    metadata:
+      labels:
+        app: ecommerce
+    spec:
+      containers:
+        - name: ecommerce
+          image: APP_IMAGE_PLACEHOLDER
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -ec
+          args:
+            - |
+              mkdir -p /data/media_root
+              ln -sfn /data/db.sqlite3 /data/media_root /app/build/
+              python manage.py migrate --noinput
+              exec gunicorn demo.wsgi:application --bind 0.0.0.0:8000 --access-logfile - --error-logfile -
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8000
+              httpHeaders:
+                - name: Host
+                  value: localhost
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 5
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: ecommerce-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ecommerce
+  namespace: staging
+spec:
+  selector:
+    app: ecommerce
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8000
