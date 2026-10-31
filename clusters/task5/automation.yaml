@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: task5
+  annotations: {kustomize.toolkit.fluxcd.io/prune: disabled}
+---
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImageRepository
+metadata: {name: fluxed-task, namespace: flux-system}
+spec:
+  image: registry.gitlab.com/niwzer/devops-task4
+  interval: 1m
+  secretRef: {name: gitlab-registry}
+---
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImagePolicy
+metadata: {name: fluxed-task, namespace: flux-system}
+spec:
+  imageRepositoryRef: {name: fluxed-task}
+  filterTags:
+    pattern: '^build-(?P<id>[0-9]+)$'
+    extract: '$id'
+  policy:
+    numerical: {order: asc}
+---
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImageUpdateAutomation
+metadata: {name: fluxed-task, namespace: flux-system}
+spec:
+  interval: 1m
+  sourceRef: {kind: GitRepository, name: flux-system}
+  git:
+    checkout: {ref: {branch: main}}
+    commit:
+      author: {name: fluxbot, email: fluxbot@users.noreply.github.com}
+      messageTemplate: 'Update fluxed-task image [skip ci]'
+    push: {branch: main}
+  update:
+    path: ./clusters/task5/apps
+    strategy: Setters
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata: {name: fluxed-task, namespace: flux-system}
+spec:
+  interval: 1m
+  sourceRef: {kind: GitRepository, name: flux-system}
+  path: ./clusters/task5/apps
+  prune: true
+  wait: true
+  timeout: 5m
