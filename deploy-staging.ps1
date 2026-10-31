@@ -6,7 +6,7 @@ if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 minikube -p devops-task4 image load --remote "$env:APP_IMAGE"
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-(Get-Content -Raw "$PSScriptRoot/k8s/staging.yaml").Replace("APP_IMAGE_PLACEHOLDER", $env:APP_IMAGE) |
+(Get-Content -Raw "$PSScriptRoot/staging.yaml").Replace("APP_IMAGE_PLACEHOLDER", $env:APP_IMAGE) |
     kubectl --context devops-task4 apply -f "-"
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
