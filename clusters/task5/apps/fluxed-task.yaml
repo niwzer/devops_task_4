@@ -21,7 +21,7 @@ spec:
       imagePullSecrets: [{name: gitlab-registry}]
       containers:
         - name: fluxed-task
-          image: registry.gitlab.com/niwzer/devops-task4:build-63 # {"$imagepolicy": "flux-system:fluxed-task"}
+          image: registry.gitlab.com/niwzer/devops-task4:build-64 # {"$imagepolicy": "flux-system:fluxed-task"}
           imagePullPolicy: IfNotPresent
           command: [sh, -ec]
           args:
