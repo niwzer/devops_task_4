@@ -6,5 +6,5 @@ docker run --rm \
     -v "${PWD}/.cache/trivy:/root/.cache/trivy" \
     aquasec/trivy:0.76.1 image \
     --image-src docker --scanners vuln --format table \
-    --exit-code 1 --timeout 10m \
+    --exit-code 1  \
     "${1:?Image name is required}" > image-report.txt
