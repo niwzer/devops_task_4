@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Namespace
 metadata:
   name: staging
----
+
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -14,7 +14,7 @@ spec:
   resources:
     requests:
       storage: 1Gi
----
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -32,6 +32,8 @@ spec:
       labels:
         app: ecommerce
     spec:
+      imagePullSecrets:
+        - name: gitlab-registry
       containers:
         - name: ecommerce
           image: APP_IMAGE_PLACEHOLDER
@@ -62,7 +64,7 @@ spec:
         - name: data
           persistentVolumeClaim:
             claimName: ecommerce-data
----
+
 apiVersion: v1
 kind: Service
 metadata:
